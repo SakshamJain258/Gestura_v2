@@ -1,0 +1,16 @@
+# Training environment requirements for Gestura Layer 1
+#
+# GPU PyTorch must be installed with the CUDA wheel index first:
+#   pip uninstall torch torchvision torchaudio
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+#
+# Then install the remaining packages:
+#   pip install -r requirements_training.txt
+
+mediapipe==0.10.14
+opencv-contrib-python==4.8.1.78
+numpy==1.26.4
+scipy>=1.11.0
+tqdm
+scikit-learn
+matplotlib

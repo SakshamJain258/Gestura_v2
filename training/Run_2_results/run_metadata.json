@@ -1,0 +1,19 @@
+{
+  "run_name": "Run_2",
+  "description": "500 epochs, CosineAnnealingLR, LR=5e-4, label_smoothing=0.05, patience=50, batch=32, warmup=10",
+  "timestamp": "2026-04-25T15:08:05.832110",
+  "files": {
+    "best_model": "gesture_model_300_best.pt",
+    "inference_model": "gesture_model_300_inference.pt",
+    "training_history": "training_history.json"
+  },
+  "checkpoints_count": 50,
+  "results": {
+    "total_epochs": 500,
+    "best_val_acc": 39.59938366718028,
+    "test_top1": 30.377358490566035,
+    "test_top5": 60.18867924528302,
+    "num_params": 3455532,
+    "num_classes": 300
+  }
+}
