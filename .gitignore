@@ -29,3 +29,6 @@ landmarks_300/
 # Local secrets
 .env
 *.env
+
+# documents
+Gestura_Project_Deep_Dive.md
