@@ -34,7 +34,7 @@ The active training and extraction scripts remain in `Model/`. Shared datasets r
 
 ## 1. Project Vision
 
-Gestura is a real-time sign language recognition application that translates ASL (American Sign Language) gestures into natural English text. The goal is to bridge the communication gap between deaf/hard-of-hearing individuals and hearing people.
+Gestura is a real-time sign language recognition application that translates ASL (American Sign Language) gestures into natural English text. The goal is to bridge the communication gap between non-vocal/specially-abled individuals (who use sign language) and speaking people.
 
 **What makes Gestura different from a typical demo project:**
 - It handles continuous signing, not just isolated word recognition
@@ -110,7 +110,7 @@ This architecture was designed after analyzing the limitations of single-model a
 | Layer | Purpose | Without It |
 |---|---|---|
 | **Layer 1 — Gesture Model** | Handles 95% of communication. 300 WLASL words cover most everyday conversation. | No sign recognition at all |
-| **Layer 2 — Fingerspelling** | Every deaf person uses fingerspelling for names, places, technical words. 26 classes, one frame at a time. | App breaks when someone spells "COVID" or their name |
+| **Layer 2 — Fingerspelling** | Every non-vocal signer uses fingerspelling for names, places, technical words. 26 classes, one frame at a time. | App breaks when someone spells "COVID" or their name |
 | **Layer 3 — LLM** | Takes messy word stream → reconstructs natural English. Doesn't need to understand signs at all. | Output is broken grammar: "hello you name what" |
 
 ### Build Order Decision
@@ -691,7 +691,7 @@ The 3.5M parameter model has too much capacity for ~8 samples/word. A smaller mo
 
 ### Why This Matters
 
-Every deaf person uses fingerspelling for:
+Every non-vocal signer uses fingerspelling for:
 - Names ("S-A-K-S-H-A-M")
 - Places ("D-E-L-H-I")
 - Technical terms ("C-O-V-I-D")

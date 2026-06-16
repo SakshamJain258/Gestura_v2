@@ -33,7 +33,7 @@ Gestura is an open-source assistive desktop application for Windows that transla
 
 The captions are **burned directly onto your video feed** and piped as a **virtual camera** ("Gestura Cam"). Anyone on your Zoom, Google Meet, or Microsoft Teams call sees your face + captions without needing any extra software on their end.
 
-**Built for:** Deaf and hard-of-hearing users who want to communicate in video calls without a human interpreter.
+**Built for:** Specially-abled, non-vocal users who want to communicate in video calls without a human interpreter.
 
 ---
 

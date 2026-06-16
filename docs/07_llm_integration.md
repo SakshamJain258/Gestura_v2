@@ -20,7 +20,7 @@ An LLM can convert this to:
 What is your name?
 ```
 
-This is especially useful when Gestura is being used in a video call where captions are read by hearing participants who expect standard English.
+This is especially useful when Gestura is being used in a video call where captions are read by speaking participants who expect standard English.
 
 ---
 

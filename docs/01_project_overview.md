@@ -2,13 +2,13 @@
 
 ## What is Gestura?
 
-Gestura is an open-source assistive application that translates American Sign Language (ASL) gestures into real-time captions using a webcam and machine learning. The long-term goal is to help Deaf and hard-of-hearing users communicate in video calls (Zoom, Teams, Google Meet) without needing a human interpreter.
+Gestura is an open-source assistive application that translates American Sign Language (ASL) gestures into real-time captions using a webcam and machine learning. The long-term goal is to help non-vocal/specially-abled users who can't speak communicate in video calls (Zoom, Teams, Google Meet) without needing a human interpreter.
 
 ---
 
 ## Why Gestura Was Built
 
-Video conferencing has become central to professional and social life. For Deaf users, captioning tools like auto-generated subtitles in Zoom exist for spoken audio but not for signed video. Gesture recognition that runs locally, in real time, with no setup beyond installing an app is the gap Gestura aims to fill.
+Video conferencing has become central to professional and social life. For non-vocal users who use sign language to communicate, captioning tools like auto-generated subtitles in Zoom exist for spoken audio but not for signed video. Gesture recognition that runs locally, in real time, with no setup beyond installing an app is the gap Gestura aims to fill.
 
 ---
 
