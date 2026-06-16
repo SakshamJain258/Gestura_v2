@@ -2,19 +2,26 @@
 startup_checks.py - pre-launch validation helpers.
 """
 
+import sys
 from pathlib import Path
 
-import cv2
+
+def _get_base_dir() -> Path:
+    """Base resource directory — supports both frozen exe and normal Python."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parents[2]   # Gestura v2/
 
 
-PHASE1_DIR = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = PHASE1_DIR.parent
+_BASE = _get_base_dir()
+TRAINING_RESULTS = _BASE / "training" / "Results"
+
 MODEL_CANDIDATES = [
-    PHASE1_DIR / "best_gesture_model_wlasl300_inference.pt",
-    PROJECT_ROOT / "MODEL_Training" / "Model" / "best_gesture_model_wlasl300_inference.pt",
-    PHASE1_DIR / "best_gesture_model_wlasl300_epoch471.pt",
-    PROJECT_ROOT / "MODEL_Training" / "Model" / "best_gesture_model_wlasl300_epoch471.pt",
+    # Run 3 (current best)
+    TRAINING_RESULTS / "Run_3" / "gesture_model_300_inference.pt",
+    TRAINING_RESULTS / "Run_3" / "gesture_model_300_best.pt",
 ]
+
 
 
 def check_model_file(paths: list[Path] | None = None) -> tuple[bool, str]:
@@ -34,34 +41,20 @@ def check_model_file(paths: list[Path] | None = None) -> tuple[bool, str]:
 
 
 def check_camera(index: int = 0) -> tuple[bool, str]:
-    """Verify camera can be opened and read from."""
-    cap = cv2.VideoCapture(index)
-
-    if cap.isOpened():
-        ret, _ = cap.read()
-        cap.release()
-        if ret:
-            return True, f"Camera {index} is available."
-        return False, (
-            f"Camera {index} opened but could not read frames.\n"
-            "Try a different camera index."
-        )
-
-    cap.release()
-    return False, (
-        f"Camera {index} could not be opened.\n\n"
-        "Possible causes:\n"
-        "  - No webcam connected\n"
-        "  - Camera in use by another app (close Zoom/Meet/Teams)\n"
-        "  - Wrong camera index (try 0 or 1)\n"
-    )
+    """
+    Verify camera index is non-negative.
+    Actual camera opening is deferred to the background CaptureThread
+    to prevent blocking or freezing the main GUI thread.
+    """
+    if index >= 0:
+        return True, f"Camera index {index} is valid."
+    return False, f"Invalid camera index {index}."
 
 
 def check_pyvirtualcam() -> tuple[bool, str]:
     """Check optional virtual cam dependency."""
     try:
         import pyvirtualcam  # noqa: F401
-
         return True, "pyvirtualcam is available."
     except ImportError:
         return False, (

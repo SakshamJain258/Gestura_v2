@@ -11,6 +11,7 @@ It intentionally excludes data collection and training utilities.
 
 import json
 import math
+import sys
 from pathlib import Path
 
 import cv2
@@ -23,9 +24,20 @@ mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 
 
-LABEL_MAP_PATH = (
-    Path(__file__).resolve().parents[2] / "MODEL_Training" / "landmarks_300" / "label_map.json"
-)
+def _get_base_dir() -> Path:
+    """
+    Return the base resource directory.
+    - In a PyInstaller frozen exe: sys._MEIPASS (the unpacked temp dir)
+    - In normal Python: two levels above this file (Gestura v2/)
+    """
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parents[2]
+
+
+BASE_DIR = _get_base_dir()
+LABEL_MAP_PATH = BASE_DIR / "landmarks_300" / "label_map.json"
+
 
 
 def _load_actions_from_label_map(path: Path = LABEL_MAP_PATH) -> np.ndarray:
@@ -63,28 +75,41 @@ class PositionalEncoding(nn.Module):
 
 
 class LandmarkEmbedding(nn.Module):
-    def __init__(self, d_model=256, dropout=0.3):
+    """
+    Structured embedding for pose, left-hand, and right-hand landmarks.
+
+    Run 3 change: internal dimensions scale proportionally to d_model.
+      At d_model=256: pose=128, hand=64  (Run 2 — hardcoded)
+      At d_model=192: pose=96,  hand=48  (Run 3 — proportional)
+    This matches training/Model/model.py LandmarkEmbedding exactly.
+    """
+
+    def __init__(self, d_model=192, dropout=0.3):
         super().__init__()
+        pose_dim = d_model // 2    # pose: d_model/2
+        hand_dim = d_model // 4    # each hand: d_model/4
+        fuse_input = pose_dim + hand_dim + hand_dim  # = d_model
+
         self.pose_proj = nn.Sequential(
-            nn.Linear(33 * 4, 128),
-            nn.LayerNorm(128),
+            nn.Linear(33 * 4, pose_dim),
+            nn.LayerNorm(pose_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
         )
         self.lh_proj = nn.Sequential(
-            nn.Linear(21 * 3, 64),
-            nn.LayerNorm(64),
+            nn.Linear(21 * 3, hand_dim),
+            nn.LayerNorm(hand_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
         )
         self.rh_proj = nn.Sequential(
-            nn.Linear(21 * 3, 64),
-            nn.LayerNorm(64),
+            nn.Linear(21 * 3, hand_dim),
+            nn.LayerNorm(hand_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
         )
         self.fuse = nn.Sequential(
-            nn.Linear(128 + 64 + 64, d_model),
+            nn.Linear(fuse_input, d_model),
             nn.LayerNorm(d_model),
             nn.ReLU(),
             nn.Dropout(dropout),
@@ -145,11 +170,11 @@ class GestureTransformer(nn.Module):
         self,
         num_classes=300,
         input_dim=258,
-        d_model=256,
-        nhead=8,
-        num_layers=4,
-        dim_ff=512,
-        dropout=0.3,
+        d_model=192,      # Run 3 default (was 256)
+        nhead=6,          # Run 3 default (was 8)
+        num_layers=3,     # Run 3 default (was 4)
+        dim_ff=384,       # Run 3 default (was 512)
+        dropout=0.0,      # Inference: no dropout
         seq_length=60,
     ):
         super().__init__()
@@ -205,13 +230,14 @@ class GestureTransformer(nn.Module):
 
 def build_gesture_model(
     num_classes=300,
-    d_model=256,
-    nhead=8,
-    num_layers=4,
-    dim_ff=512,
-    dropout=0.3,
+    d_model=192,      # Run 3: reduced from 256
+    nhead=6,          # Run 3: reduced from 8
+    num_layers=3,     # Run 3: reduced from 4
+    dim_ff=384,       # Run 3: reduced from 512
+    dropout=0.0,      # inference: no dropout
     seq_length=60,
 ):
+    """Instantiate GestureTransformer with Run 3 anti-overfitting architecture."""
     return GestureTransformer(
         num_classes=num_classes,
         input_dim=258,

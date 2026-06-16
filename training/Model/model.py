@@ -1,4 +1,4 @@
-    """
+"""
 Gesture Transformer Model — Layer 1 (v2, reduced capacity)
 ============================================================
 Conv1D feature extractor + Transformer Encoder for 300-class

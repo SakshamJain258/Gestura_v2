@@ -1,34 +1,70 @@
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.pyc
 
-# Virtual environments
+# ── Virtual environments ───────────────────────────────────────────────────────
 .venv/
 venv/
 env/
 my_venv/
 
-# IDE / OS
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
 
-# Notebooks / generated training output
+# ── Jupyter ───────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
+*.ipynb
+
+# ── Large raw datasets (use Git LFS or store externally) ──────────────────────
+WLASL_300/
+landmarks_300/
+Alphabet_Data/
+training/fingerspelling/fingerspelling_landmarks/
+training/landmarks_300/
+
+# ── All model weights (large binary files — use Git LFS or releases) ──────────
+*.pt
+*.pth
+*.onnx
+*.keras
+*.h5
+
+# ── Training intermediate files ───────────────────────────────────────────────
+training/Results/Run_3/checkpoints/
+training/training_logs/
+training/Run_2_results/
+app/app.log
+
+# ── PyInstaller / build artifacts ─────────────────────────────────────────────
+build/build_temp/
+build/dist/
+*.spec.bak
+*.zip
+*.exe
+
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
 Logs/
 logs/
 runs/
-checkpoints/
+*.log
 
-# Large raw datasets should be stored outside normal Git or with Git LFS
-WLASL_300/
-landmarks_300/
-
-# Local secrets
+# ── Local secrets ─────────────────────────────────────────────────────────────
 .env
 *.env
+~/.gestura/
 
-# documents
+# ── Misc ──────────────────────────────────────────────────────────────────────
+workflow/
+implementation_plan.md
 Gestura_Project_Deep_Dive.md
+test_*.py
+camera_test.py

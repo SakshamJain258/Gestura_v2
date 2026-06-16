@@ -14,6 +14,13 @@ Usage:
 import json
 import os
 import sys
+
+# Force UTF-8 output so Unicode chars don't crash on Windows cp1252 terminals
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 import argparse
 from pathlib import Path
 

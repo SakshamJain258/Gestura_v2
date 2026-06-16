@@ -1,0 +1,19 @@
+{
+  "run_name": "Run_3",
+  "description": "Run 3: GestureTransformer anti-overfitting configuration",
+  "timestamp": "2026-06-15T22:11:32.086298",
+  "files": {
+    "best_model": "gesture_model_300_best.pt",
+    "inference_model": "gesture_model_300_inference.pt",
+    "training_history": "training_history.json"
+  },
+  "checkpoints_count": 50,
+  "results": {
+    "total_epochs": 500,
+    "best_val_acc": 6.779661016949152,
+    "test_top1": 5.09433962264151,
+    "test_top5": 20.566037735849058,
+    "num_params": 1661868,
+    "num_classes": 300
+  }
+}

@@ -8,6 +8,13 @@ Usage:
 import os
 import sys
 import json
+
+# Force UTF-8 output so Unicode chars don't crash on Windows cp1252 terminals
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 import shutil
 import argparse
 from pathlib import Path

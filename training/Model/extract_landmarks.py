@@ -31,8 +31,12 @@ POSE_DIMS = 33 * 4       # x, y, z, visibility
 HAND_DIMS = 21 * 3       # x, y, z per hand
 FEATURE_DIM = POSE_DIMS + HAND_DIMS * 2  # 258
 
-DATASET_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "WLASL_300")
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "landmarks_300")
+# __file__ is in training/Model/ so we need 3 x dirname to reach Gestura v2/
+_MODEL_DIR    = os.path.dirname(os.path.abspath(__file__))   # .../training/Model
+_TRAINING_DIR = os.path.dirname(_MODEL_DIR)                  # .../training
+_V2_ROOT      = os.path.dirname(_TRAINING_DIR)               # .../Gestura v2
+DATASET_ROOT  = os.path.join(_V2_ROOT, "WLASL_300")
+OUTPUT_DIR    = os.path.join(_V2_ROOT, "landmarks_300")
 
 
 def extract_keypoints(results):
@@ -173,7 +177,7 @@ def build_manifest(splits=("train", "val", "test")):
     manifest_path = os.path.join(OUTPUT_DIR, "manifest.json")
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
-    print(f"\nManifest saved → {manifest_path}")
+    print(f"\nManifest saved -> {manifest_path}")
 
     # Build and save label map (sorted alphabetically for consistency)
     sorted_words = sorted(all_words)
@@ -181,7 +185,7 @@ def build_manifest(splits=("train", "val", "test")):
     label_map_path = os.path.join(OUTPUT_DIR, "label_map.json")
     with open(label_map_path, "w") as f:
         json.dump(label_map, f, indent=2)
-    print(f"Label map saved → {label_map_path} ({len(label_map)} classes)")
+    print(f"Label map saved -> {label_map_path} ({len(label_map)} classes)")
 
     return manifest, label_map
 
@@ -226,7 +230,7 @@ def main():
                     failed += 1
 
                 if (i + 1) % 50 == 0 or (i + 1) == len(pairs):
-                    print(f"  [{split}] {i+1}/{len(pairs)} | ✓ {success} | ✗ {failed} | ⊘ {skipped}")
+                    print(f"  [{split}] {i+1}/{len(pairs)} | OK:{success} | FAIL:{failed} | SKIP:{skipped}")
         else:
             # Multi-process
             with Pool(args.workers) as pool:
@@ -239,9 +243,9 @@ def main():
                         failed += 1
 
                     if (i + 1) % 50 == 0 or (i + 1) == len(pairs):
-                        print(f"  [{split}] {i+1}/{len(pairs)} | ✓ {success} | ✗ {failed} | ⊘ {skipped}")
+                        print(f"  [{split}] {i+1}/{len(pairs)} | OK:{success} | FAIL:{failed} | SKIP:{skipped}")
 
-        print(f"\n  {split} done: ✓ {success} extracted | ✗ {failed} failed | ⊘ {skipped} skipped")
+        print(f"\n  {split} done: OK:{success} extracted | FAIL:{failed} failed | SKIP:{skipped} skipped")
 
     # Build manifest after all extraction
     print(f"\n{'='*60}")

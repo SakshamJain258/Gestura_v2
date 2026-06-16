@@ -1,13 +1,35 @@
+# Gestura v2 — Runtime dependencies
+# Pinned to the versions validated in Phase 1 + Phase 2
+
+# ── MediaPipe / Vision ────────────────────────────────────────────────────────
 mediapipe==0.10.14
 opencv-contrib-python==4.8.1.78
+protobuf==4.25.3
+
+# ── Numerics ──────────────────────────────────────────────────────────────────
 numpy==1.26.4
 scipy>=1.11.0
-tqdm
-scikit-learn
-matplotlib
-PyQt6
-pyvirtualcam
-tensorflow
+
+# ── ML / Training ─────────────────────────────────────────────────────────────
 torch
 torchvision
 torchaudio
+scikit-learn
+matplotlib
+tqdm
+
+# ── App / UI ──────────────────────────────────────────────────────────────────
+PyQt6
+
+# ── Virtual Camera (optional) ─────────────────────────────────────────────────
+# Install OBS Virtual Camera or Unity Capture driver first, then:
+pyvirtualcam
+
+# ── Gemini API (Task 8 — LLM caption refinement) ─────────────────────────────
+google-generativeai
+
+# ── Packaging ─────────────────────────────────────────────────────────────────
+# pyinstaller  # install separately: pip install pyinstaller
+
+# ── Training only (not needed at runtime) ────────────────────────────────────
+# tensorflow  # was used for older Keras model — PyTorch replaces it

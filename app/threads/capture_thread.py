@@ -25,18 +25,59 @@ class CaptureThread(QThread):
     def run(self):
         """Read frames in the background thread until stopped."""
         self._running = True
-        cap = cv2.VideoCapture(self.camera_index)
-
-        if not cap.isOpened():
+        
+        import platform
+        is_windows = platform.system() == "Windows"
+        
+        cap = None
+        working = False
+        
+        if is_windows:
+            print(f"[CaptureThread] Windows detected. Trying CAP_DSHOW backend for camera index {self.camera_index}...")
+            try:
+                cap = cv2.VideoCapture(self.camera_index, cv2.CAP_DSHOW)
+                if cap.isOpened():
+                    ret, _ = cap.read()
+                    if ret:
+                        working = True
+                    else:
+                        print("[CaptureThread] CAP_DSHOW opened but failed to read. Releasing...")
+                        cap.release()
+            except Exception as e:
+                print(f"[CaptureThread] Exception opening with CAP_DSHOW: {e}")
+                if cap is not None:
+                    cap.release()
+                working = False
+                
+        if not working:
+            print(f"[CaptureThread] Trying default backend for camera index {self.camera_index}...")
+            try:
+                cap = cv2.VideoCapture(self.camera_index)
+                if cap.isOpened():
+                    ret, _ = cap.read()
+                    if ret:
+                        working = True
+                    else:
+                        print("[CaptureThread] Default backend opened but failed to read. Releasing...")
+                        cap.release()
+            except Exception as e:
+                print(f"[CaptureThread] Exception opening with default backend: {e}")
+                if cap is not None:
+                    cap.release()
+                working = False
+                
+        if cap is None or not working or not cap.isOpened():
             message = f"Could not open camera {self.camera_index}."
             print(f"[CaptureThread] ERROR: {message}")
             self.error_occurred.emit(message)
             self._running = False
             return
 
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        cap.set(cv2.CAP_PROP_FPS, 25)
+        # Set standard resolution.
+        # DO NOT set CAP_PROP_FPS on Windows, as changing FPS on MSMF/DSHOW backends
+        # frequently deadlocks the camera driver.
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         prev_time = time.time()
         frame_count = 0
@@ -84,7 +125,7 @@ class CaptureThread(QThread):
         if not self.wait(wait_ms):
             message = "Camera thread did not stop within the timeout."
             print(f"[CaptureThread] WARNING: {message}")
-            self.error_occurred.emit(message)
+            # Do not emit error_occurred here to avoid triggering recursive shutdown loops
             return False
 
         return True

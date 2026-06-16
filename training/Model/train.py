@@ -28,6 +28,13 @@ Usage:
 import os
 import sys
 import json
+
+# Force UTF-8 output so Unicode chars don't crash on Windows cp1252 terminals
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 import time
 import argparse
 import numpy as np
@@ -267,7 +274,7 @@ def main():
     print(f"  AMP:          {use_amp}")
     print(f"  Epochs:       {args.epochs}")
     print(f"  Batch:        {args.batch_size}")
-    print(f"  LR:           {args.lr} → {args.min_lr}")
+    print(f"  LR:           {args.lr} -> {args.min_lr}")
     print(f"  Patience:     {args.patience} (on val_loss)")
     print(f"  Mixup:        {'ON (α={})'.format(args.mixup_alpha) if use_mixup else 'OFF'}")
     print(f"  Label smooth: 0.2")
@@ -413,7 +420,7 @@ def main():
                 "dim_ff": args.dim_ff,
                 "history": history,
             }, best_path)
-            print(f"       ★ New best model saved! val_loss={val_loss:.4f}, val_acc={val_acc:.2f}%")
+            print(f"       [NEW BEST] New best model saved! val_loss={val_loss:.4f}, val_acc={val_acc:.2f}%")
         else:
             patience_counter += 1
 
@@ -476,7 +483,7 @@ def main():
 
     with open(history_path, "w") as f:
         json.dump(history, f, indent=2)
-    print(f"\n  History saved → {history_path}")
+    print(f"\n  History saved -> {history_path}")
 
     # ── Export inference-ready model ────────────────────────────────────────
     inference_path = os.path.join(CHECKPOINT_DIR, "gesture_model_300_inference.pt")
@@ -489,10 +496,10 @@ def main():
         "dim_ff": args.dim_ff,
         "dropout": 0.0,  # No dropout at inference
     }, inference_path)
-    print(f"  Inference model saved → {inference_path}")
+    print(f"  Inference model saved -> {inference_path}")
 
     print(f"\n{'='*60}")
-    print(f"  Done! ✓")
+    print(f"  Done! OK")
     print(f"{'='*60}")
 
 
