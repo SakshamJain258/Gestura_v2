@@ -99,44 +99,48 @@ CaptureThread  ──frame_ready──►  InferenceThread  ──push_frame─�
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Option A: Pre-built Standalone Production Release (Recommended)
 
+You do **not** need to install Python, configure PyTorch, or set up virtual environments. The application has been fully packaged using **PyInstaller** in **One Folder Mode**.
+
+1. **Download the Release Package**:
+   * 🔗 **[Download Gestura v2 for Windows (ZIP)](https://d2pymib7m6uo9e.cloudfront.net/Gestura_v1.zip)** (~2.72 GB ZIP / ~4.31 GB uncompressed)
+2. **Extract the ZIP**: Extract the folder onto your local disk.
+3. **Install the Virtual Camera Driver**: Run `install_virtualcam_driver.exe` once inside the folder to register the virtual camera device.
+4. **Run the App**: Launch `Gestura.exe` inside the extracted folder.
+
+---
+
+### Option B: Run from Source (Development Mode)
+
+#### Prerequisites
 - **Windows 10 or 11**
 - **Python 3.11**
 - A **webcam**
 - **4 GB RAM** minimum
-- *(Optional)* NVIDIA GPU for faster inference
-- *(Optional)* [OBS Studio](https://obsproject.com/) for the virtual camera feature
+- *(Optional)* NVIDIA GPU for CUDA accelerated inference
+- *(Optional)* [OBS Studio](https://obsproject.com/) (to register/test OBS Virtual Camera fallback)
 
----
-
-### 1. Clone the Repository
-
+#### 1. Clone the Repository
 ```powershell
 git clone https://github.com/SakshamJain258/Gestura_v2.git
 cd Gestura_v2
 ```
 
----
-
-### 2. Create a Virtual Environment
-
+#### 2. Create a Virtual Environment
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install --upgrade pip
 ```
 
----
-
-### 3. Install Dependencies
-
+#### 3. Install Dependencies
 **CPU only (works on any machine):**
 ```powershell
 pip install -r requirements.txt
 ```
 
-**CUDA (recommended if you have an NVIDIA GPU):**
+**CUDA GPU Acceleration:**
 ```powershell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 pip install -r requirements.txt
@@ -144,55 +148,25 @@ pip install -r requirements.txt
 
 > ⚠️ **Pinned versions matter.** Do not upgrade `mediapipe`, `opencv-contrib-python`, `protobuf`, or `numpy` — the versions in `requirements.txt` are the only validated combination.
 
----
-
-### 4. Download the Model Weights
-
-The trained model weights are not included in this repository due to file size. Download them from [**GitHub Releases**](https://github.com/SakshamJain258/Gestura_v2/releases) and place them as follows:
-
+#### 4. Download Model Weights
+Since the weight files exceed Git thresholds, download them from [**GitHub Releases**](https://github.com/SakshamJain258/Gestura_v2/releases) and place them in the root directory:
 ```
 Gestura_v2/
 ├── gesture_model_300_inference.pt    ← word recognition model (~6.7 MB)
 └── fingerspelling_model.pt           ← A–Z fingerspelling model
 ```
 
----
+#### 5. Set Up Virtual Camera Driver
+Ensure virtual camera outputs work by running the installer script or configuring [OBS Studio](https://obsproject.com/) (Tools $\rightarrow$ Virtual Camera $\rightarrow$ Start Virtual Camera) to register the virtual camera drivers.
 
-### 5. *(Optional)* Set Up Virtual Camera
-
-The virtual camera pipes Gestura's annotated feed into your meeting app.
-
-1. Install **[OBS Studio](https://obsproject.com/)**
-2. Open OBS → **Tools → Virtual Camera → Start Virtual Camera** (do this once to register the driver)
-3. In your meeting app, select **"OBS Virtual Camera"** as your camera input
-
-> **Without a virtual camera driver:** Gestura still runs — the captions show in the app window, but won't appear in your meeting feed.
-
----
-
-### 6. Run the App
-
+#### 6. Run the App
 ```powershell
 cd app
 python app.py
 ```
 
-Then:
-1. Click **Start** in the app
-2. Open your meeting app and select **"OBS Virtual Camera"** as your camera
-3. Start signing — your captions appear live for everyone on the call
-
 ---
 
-### 7. *(Optional)* Enable Gemini Grammar Correction
-
-1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. In the app, click **⚙ Key** → paste your key → **Save Key**
-3. Toggle **Enable Gemini** on
-
-> Newly created keys take 2–3 minutes to activate.
-
----
 
 ## 🏛️ Model
 
@@ -353,6 +327,80 @@ Detailed writeups for each subsystem live in [`docs/`](./docs):
 
 ---
 
+## 📦 Distribution Build & Packaging
+
+The desktop application is packaged using **PyInstaller** in **One Folder Mode**, which bundles the Python runtime, PyTorch, MediaPipe, OpenCV, and all required DLLs/assets into a standalone folder. 
+
+*   **Final Package size**: ~2.72 GB ZIP compressed / ~4.31 GB uncompressed.
+*   **No Python Dependency**: The user does not need to install Python or set up local environments.
+
+### Component Size Breakdown
+
+| Dependency | Size | Role |
+|---|---|---|
+| **PyTorch** | ~3.63 GB | AI Inference Engine |
+| **jaxlib** | ~209 MB | Core mathematical dependency |
+| **OpenCV** | ~119 MB | Frame acquisition & scaling |
+| **MediaPipe** | ~95 MB | Landmark extraction model |
+| **PyQt6** | ~74 MB | Desktop UI layout |
+
+---
+
+## ☁️ AWS Production Deployment Architecture
+
+To host the landing portal and distribute the application globally, Gestura is deployed on a professional cloud infrastructure:
+
+```
+                     GitHub
+                        │
+              git push origin main
+                        │
+                        ▼
+                 AWS Amplify
+             (Build & Deploy CI/CD)
+                        │
+                        ▼
+          CloudFront (Website CDN)
+                        │
+                        ▼
+     https://main.d9h6fx0138k7u.amplifyapp.com
+                        │
+                 Download Button
+                        │
+                        ▼
+      CloudFront (Installer CDN)
+                        │
+            Origin Access Control (OAC)
+                        │
+                        ▼
+      Amazon S3 Bucket (Private)
+                        │
+                        ▼
+              Gestura_v1.zip
+```
+
+### 1. Amazon S3 (Object Storage)
+*   The `Gestura_v1.zip` binary is hosted in a private S3 bucket: `gestura-installer-download`.
+*   Provides durable, low-cost object storage capable of handling massive parallel downloads.
+
+### 2. Amazon CloudFront (Global CDN) & Origin Access Control (OAC)
+*   **Global Caching**: The installer is served via a CloudFront CDN distribution (`https://d2pymib7m6uo9e.cloudfront.net`), delivering downloads via global edge locations with low latency.
+*   **Security (OAC)**: The S3 bucket remains **completely private**. Users cannot access S3 directly. Instead, CloudFront accesses S3 securely via Origin Access Control (OAC), serving as the sole gateway for downloads.
+
+### 3. AWS Amplify & CI/CD Website Hosting
+*   The Next.js landing portal is hosted on **AWS Amplify** connected directly to the GitHub repository.
+*   **CI/CD Pipeline**: Any push to the `main` branch automatically triggers an Amplify pipeline that rebuilds and redeploys the frontend, distributing updates instantly via CloudFront.
+
+---
+
+## 🛠️ Software Engineering & Cloud Concepts Applied
+
+*   **Least-Privilege IAM**: Configured a dedicated programmatic IAM User with a secure Access Key ID / Secret Access Key pair to interface with the AWS CLI, rather than using the root credentials.
+*   **Single Source of Truth**: The landing page references a single centralized variable `siteLinks.download` to ensure all download buttons stay in sync with CloudFront updates.
+*   **Origin Access Control**: Implemented strict CloudFront-to-S3 bucket policies to protect assets and prevent direct S3 scraping.
+
+---
+
 ## 🗺️ Roadmap
 
 | Status | Feature |
@@ -367,13 +415,17 @@ Detailed writeups for each subsystem live in [`docs/`](./docs):
 | 📋 Planned | Expanded vocabulary beyond 300 words |
 | 📋 Planned | macOS / Linux support |
 
+
 ---
 
 ## 🌐 Website & Landing Page
 
-The web portal and landing page for **Gestura** are hosted in a separate repository. This website serves as the presentation portal and download distributor for the packaged desktop application.
+The web portal and landing page for **Gestura**:
 
-🔗 **Website Repository:** [Gestura Web Portal](https://github.com/SakshamJain258/Gestura-Website) *(Note: Link will be updated as the separate repo is published.)*
+🔗 **Live Website:** [Gestura Web Portal](https://main.d9h6fx0138k7u.amplifyapp.com/)
+
+🔗 **Website Repository:** [Gestura Web Portal Repository](https://github.com/SakshamJain258/Gestura-Website)
+
 
 ---
 
